@@ -1,0 +1,17 @@
+<LOG>1 : 22/12/2020  01:11:16 <Debug>:UDP Socket creaded
+<LOG>2 : 22/12/2020  01:11:16 <Debug>:Read Request Packet01./test.txt octet 
+<LOG>3 : 22/12/2020  01:11:16 <Debug>:Data Packet with block no:1
+<LOG>4 : 22/12/2020  01:11:16 <Debug>:Acknowledgement Packet04 1
+<LOG>5 : 22/12/2020  01:11:16 <Debug>:Data Packet with block no:2
+<LOG>6 : 22/12/2020  01:11:16 <Debug>:Acknowledgement Packet04 2
+<LOG>7 : 22/12/2020  01:11:16 <Debug>:Data Packet with block no:3
+<LOG>8 : 22/12/2020  01:11:16 <Debug>:Acknowledgement Packet04 3
+<LOG>9 : 22/12/2020  01:11:16 <Debug>:Data Packet with block no:4
+<LOG>10 : 22/12/2020  01:11:16 <Debug>:Acknowledgement Packet04 4
+<LOG>11 : 22/12/2020  01:11:16 <Debug>:Data Packet with block no:5
+<LOG>12 : 22/12/2020  01:11:16 <Debug>:Acknowledgement Packet04 5
+<LOG>13 : 22/12/2020  01:11:16 <Debug>:Data Packet with block no:6
+<LOG>14 : 22/12/2020  01:11:16 <Debug>:Acknowledgement Packet04 6
+<LOG>15 : 22/12/2020  01:11:16 <Debug>:Data Packet with block no:7
+<LOG>16 : 22/12/2020  01:11:16 <Debug>:Acknowledgement Packet04 7
+<LOG>17 : 22/12/2020  01:11:16 <Debug>:Closing the Socket

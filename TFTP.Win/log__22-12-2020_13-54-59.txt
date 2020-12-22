@@ -1,0 +1,6 @@
+<LOG>1 : 22/12/2020  13:54:59 <Debug>:port
+<LOG>2 : 22/12/2020  13:54:59 <Debug>:TCP Socket creaded
+<LOG>3 : 22/12/2020  13:54:59 <Debug>:Socket Binded
+<LOG>4 : 22/12/2020  13:54:59 <Debug>:UDP Socket creaded
+<LOG>5 : 22/12/2020  13:54:59 <Debug>:Socket Binded
+<LOG>6 : 22/12/2020  13:54:59 <Debug>:Listening to connection

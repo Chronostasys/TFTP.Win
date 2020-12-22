@@ -1,0 +1,2 @@
+<LOG>1 : 22/12/2020  00:51:26 <Debug>:UDP Socket creaded
+<LOG>2 : 22/12/2020  00:51:26 <Debug>:Read Request Packet01./12.txt octet 

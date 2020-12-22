@@ -1,0 +1,4 @@
+<LOG>1 : 21/12/2020  23:56:33 <Debug>:UDP Socket creaded
+<LOG>2 : 21/12/2020  23:56:33 <Debug>:Write Request Packet02C:\Users\17697\source\repos\TFTP.Win\1.txt octet 
+<LOG>3 : 21/12/2020  23:56:33 <Debug>:Data Packet with block no:1
+<LOG>4 : 21/12/2020  23:56:33 <Debug>:Closing the Socket
