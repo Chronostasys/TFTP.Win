@@ -14,6 +14,7 @@ namespace TFTP.WinFormApp
 {
     public partial class Form1 : Form
     {
+        private string prevDir;
         public Form1()
         {
             InitializeComponent();
@@ -30,14 +31,19 @@ namespace TFTP.WinFormApp
             textBox1.Text = folderBrowserDialog1.SelectedPath;
             if (!string.IsNullOrEmpty(textBox1.Text))
             {
+                Directory.SetCurrentDirectory(textBox1.Text);
                 numericUpDown1.Enabled = true;
                 button2.Enabled = true;
             }
         }
-
+        protected override void OnClosed(EventArgs e)
+        {
+            cmd.Kill();
+            base.OnClosed(e);
+        }
+        Process cmd = new Process();
         private void button2_Click(object sender, EventArgs e)
         {
-            Process cmd = new Process();
             cmd.StartInfo.FileName = "cmd.exe";
             cmd.StartInfo.RedirectStandardInput = true;
             cmd.StartInfo.RedirectStandardOutput = true;
@@ -47,6 +53,7 @@ namespace TFTP.WinFormApp
 
             cmd.StandardInput.WriteLine($"cd \"{textBox1.Text}\"");
             cmd.StandardInput.Flush();
+            prevDir = Directory.GetCurrentDirectory();
             cmd.StandardInput.WriteLine($"{Path.Combine(Directory.GetCurrentDirectory(), "TFTP.Win.exe")} tftp -s port \"({(int)numericUpDown1.Value})\"");
             cmd.StandardInput.Flush();
             cmd.StandardInput.Close();
@@ -58,14 +65,17 @@ namespace TFTP.WinFormApp
 
         private void button3_Click(object sender, EventArgs e)
         {
-            DllImportFuncs.Port = (int)numericUpDown2.Value;
-            if (checkBox1.Checked)
+            try
             {
-                DllImportFuncs.Read(textBox2.Text);
+                if (checkBox1.Checked)
+                    File.Copy(Path.Combine(prevDir, textBox2.Text), textBox2.Text);
+                else
+                    File.Copy(textBox2.Text, Path.Combine(prevDir, textBox2.Text));
             }
-            else
+            catch (Exception err)
             {
-                DllImportFuncs.Write(textBox2.Text);
+
+                MessageBox.Show(err.Message);
             }
         }
 

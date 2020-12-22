@@ -29,7 +29,9 @@ public:
 		virtual int Close(){return 0;}
 
 		/*This method sends the data . Takes packet to be sent as arguments.*/
-		virtual int Send(char* packet){return 0;}
+		virtual int Send(char* buff, int len) {return 0;}
+		/*This method sends the data . Takes packet to be sent as arguments.*/
+		virtual int Send(char* buff) { return 0; }
 
 		/*This method receives the data . returns the received packet as given parameter*/
 		virtual int Receive(char* packet){return 0;}

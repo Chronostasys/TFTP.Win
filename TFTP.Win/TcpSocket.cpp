@@ -138,16 +138,27 @@ TcpSocket::Close()
 
 
 int 
-TcpSocket::Send(char* buff)
+TcpSocket::Send(char* buff, int len)
  {	
 	/*Sent the data to the m_server
 	 *param buff-IN
 	 */	
 	 char buf[1024];
 	 strcpy(buf,buff);
-	 int n=send( m_Listen,buf, sizeof(buf), 0);
+	 int n=send( m_Listen,buf, len, 0);
 	 return 1;
  }
+int
+TcpSocket::Send(char* buff)
+{
+	/*Sent the data to the m_server
+	 *param buff-IN
+	 */
+	char buf[1024];
+	strcpy(buf, buff);
+	int n = send(m_Listen, buf, strlen(buf), 0);
+	return 1;
+}
 
 int
 TcpSocket::Receive(char* buff)

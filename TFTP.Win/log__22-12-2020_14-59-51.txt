@@ -1,0 +1,3 @@
+<LOG>1 : 22/12/2020  14:59:51 <Debug>:host
+<LOG>2 : 22/12/2020  14:59:51 <Debug>:UDP Socket creaded
+<LOG>3 : 22/12/2020  14:59:51 <Debug>:Read Request Packet01./1.gif octet 

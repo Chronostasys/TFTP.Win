@@ -24,7 +24,8 @@ public:
 	int Connect(char* host,int port);
 
 	int Close();
-	int Send(char* packet);
+	int Send(char* buff, int len);
+	int Send(char* buff);
 	int Receive(char*  packet);
 
 

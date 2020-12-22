@@ -79,7 +79,7 @@ TftpManager::ReadRequestHandler(Isocket* sock, char* file)
 
 
 
-	infile.open(file);
+	infile.open(file, ios::binary);
 	
 	auto var = infile.good();
 	if (!var)
@@ -103,7 +103,7 @@ TftpManager::ReadRequestHandler(Isocket* sock, char* file)
 			/*Send 512 bytes of data except incase of EOF send less then 512bytes*/
 			buf[file_pointer] = '\0';
 			Rpacket->EncodePacket(opcode, buf, packet);
-			Error_Barrier(sock->Send(packet));
+			Error_Barrier(sock->Send(packet, file_pointer));
 
 			/*Receive  packet(ack expected)*/
 
@@ -292,8 +292,8 @@ TftpManager::Read(char* file)
 	while (true)
 	{
 		/*Receive  packet */
-		ZeroMemory(&buf, sizeof(buf));
-		m_clientSock->Receive(buf);
+		ZeroMemory(&buf, TFTP_PACKET_MAX_SIZE);
+		size = m_clientSock->Receive(buf);
 		m_packet->DecodePacket(buf);
 		opcode = PACKET_ACK;
 		auto op = m_packet->GetopCode();
@@ -302,9 +302,9 @@ TftpManager::Read(char* file)
 		{
 
 			outfile.seekg(file_pointer, ios_base::beg);
-			outfile.write(&buf[5], strlen(&buf[5]));
-			file_pointer += strlen(&buf[5]);
-			size = strlen(&buf[5]);
+			outfile.write(&buf[5], size);
+			file_pointer += size;
+			//size = strlen(&buf[5]);
 
 			m_packet->EncodePacket(opcode, buf, packet);
 			m_clientSock->Send(packet);

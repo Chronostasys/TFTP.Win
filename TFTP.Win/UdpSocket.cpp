@@ -87,7 +87,7 @@ UdpSocket::Close()
 
 
 int 
-UdpSocket::Send(char* buff)
+UdpSocket::Send(char* buff, int len)
  {	
 	 /*Sent the data to the m_server
 	 *param buff-IN
@@ -95,12 +95,28 @@ UdpSocket::Send(char* buff)
 	  char buf[1024];
 	  int n;
 	  strcpy(buf,buff);
-	  n=  sendto(m_Listen,buf,strlen(buf),0,(struct sockaddr *)&m_server,sizeof(m_server));
+	  n=  sendto(m_Listen,buf,len,0,(struct sockaddr *)&m_server,sizeof(m_server));
 	  if(n==0)
 		return 0;
 	  else
 		return 1;
  }
+
+int
+UdpSocket::Send(char* buff)
+{
+	/*Sent the data to the m_server
+	*param buff-IN
+	*/
+	char buf[1024];
+	int n;
+	strcpy(buf, buff);
+	n = sendto(m_Listen, buf, strlen(buf), 0, (struct sockaddr*)&m_server, sizeof(m_server));
+	if (n == 0)
+		return 0;
+	else
+		return 1;
+}
 
 
 
@@ -119,7 +135,7 @@ UdpSocket::Receive(char* buff)
 		 printf("error code: %d, error msg: %s\n", 0, "failed to receive responce");
 	 }
 	
-	 return 1;
+	 return n;
  
 }
 
