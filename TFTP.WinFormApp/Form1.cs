@@ -97,7 +97,7 @@ namespace TFTP.WinFormApp
             var op = checkBox1.Checked ? "read" : "write";
             cmdc.StartInfo.Arguments = "";
             cmdc.Start();
-            cmdc.StandardInput.WriteLine($"cd \"{textBox3.Text}\" & {Path.Combine(prevDir, "TFTP.Win.exe")} tftp -c host \"(127.0.0.1)\" port \"({(int)numericUpDown1.Value})\" -proto \"(udp)\" -{op} \"(./{textBox2.Text})\" & exit");
+            cmdc.StandardInput.WriteLine($"cd \"{textBox3.Text}\" & {Path.Combine(prevDir, "TFTP.Win.exe")} tftp -c host \"(127.0.0.1)\" port \"({(int)numericUpDown2.Value})\" -proto \"(udp)\" -{op} \"(./{textBox2.Text})\" & exit");
             cmdc.StandardInput.Flush();
 
             Task.Run(() =>
