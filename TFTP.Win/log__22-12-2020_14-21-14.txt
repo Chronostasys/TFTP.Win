@@ -1,6 +1,0 @@
-<LOG>1 : 22/12/2020  14:21:14 <Debug>:host
-<LOG>2 : 22/12/2020  14:21:14 <Debug>:UDP Socket creaded
-<LOG>3 : 22/12/2020  14:21:14 <Debug>:Read Request Packet01./1.gif octet 
-<LOG>4 : 22/12/2020  14:21:14 <Debug>:Data Packet with block no:1
-<LOG>5 : 22/12/2020  14:21:24 <Debug>:Acknowledgement Packet04 1
-<LOG>6 : 22/12/2020  14:21:40 <Debug>:Closing the Socket

@@ -4,6 +4,9 @@
 #include "CommandHandler.h"
 #include "Tftpmanager.h"
 #include "Const.h"
+#include <ctime>
+#include <ratio>
+#include <chrono>
 
 struct command_line_data
 {
@@ -90,7 +93,12 @@ extern "C"
 {
 	__declspec(dllexport) int main(int argc, char** argv);
 }
-
+long GetFileSize(std::string filename)
+{
+	struct stat stat_buf;
+	int rc = stat(filename.c_str(), &stat_buf);
+	return rc == 0 ? stat_buf.st_size : -1;
+}
 int main(int argc, char** argv)
 {
 
@@ -115,11 +123,28 @@ int main(int argc, char** argv)
 
 		if (!strcmp(arguments.req, "-read"))
 		{
+			using namespace std::chrono;
+
+			high_resolution_clock::time_point stime = high_resolution_clock::now();
 			m_Manager->Read(arguments.filename);
+			high_resolution_clock::time_point etime = high_resolution_clock::now();
+			auto fsize = GetFileSize(arguments.filename);
+			duration<double, std::milli> c = (etime - stime);
+			printf("%lf Kb/s\n", ((long long)fsize*1000/1024) * 8 / c.count());
+			
 		}
 
 		if (!strcmp(arguments.req, "-write"))
+		{
+			using namespace std::chrono;
+
+			high_resolution_clock::time_point stime = high_resolution_clock::now();
 			m_Manager->Write(arguments.filename);
+			high_resolution_clock::time_point etime = high_resolution_clock::now();
+			auto fsize = GetFileSize(arguments.filename);
+			duration<double, std::milli> c = (etime - stime);
+			printf("%lf Kb/s\n", ((long long)fsize * 1000 / 1024) * 8 / c.count());
+		}
 		return 0;
 	}
 	else

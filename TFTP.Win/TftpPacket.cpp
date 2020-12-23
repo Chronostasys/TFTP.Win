@@ -149,7 +149,7 @@ TftpPacket::CreateAck()
 	char ack[10];
 	char buffer[8];
 	strcpy(ack, TFTP_OPCODE_ACK);
-	sprintf(buffer, " %d", m_blockno);
+	sprintf(buffer, " %d ", m_blockno);
 	strcat(ack, buffer);
 	strcpy(m_packet, ack);
 	return 0;
