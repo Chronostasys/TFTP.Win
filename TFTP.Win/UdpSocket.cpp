@@ -16,14 +16,14 @@ UdpSocket::Create()
 	 *param port-IN 
 	 *return 0 for success else 1
 	 */
-	//struct timeval timeout;
-	//timeout.tv_sec = 10;
-	//timeout.tv_usec = 0;
+	struct timeval timeout;
+	timeout.tv_sec = 10;
+	timeout.tv_usec = 0;
 	m_Listen = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-	//setsockopt(m_Listen, SOL_SOCKET, SO_SNDTIMEO, (char*)&timeout,
-	//	sizeof(timeout));
-	//setsockopt(m_Listen, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout,
-	//	sizeof(timeout));
+	setsockopt(m_Listen, SOL_SOCKET, SO_SNDTIMEO, (char*)&timeout,
+		sizeof(timeout));
+	setsockopt(m_Listen, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout,
+		sizeof(timeout));
     if (m_Listen == SOCKET_ERROR)
     {
         Logger::Instance().WriteError(logger<<"Error creading UDP socket"<<WSAGetLastError());

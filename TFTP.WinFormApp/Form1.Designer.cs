@@ -218,7 +218,7 @@ namespace TFTP.WinFormApp
             this.Controls.Add(this.flowLayoutPanel2);
             this.Controls.Add(this.flowLayoutPanel1);
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "TFTP";
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
             this.flowLayoutPanel1.ResumeLayout(false);
             this.flowLayoutPanel1.PerformLayout();
