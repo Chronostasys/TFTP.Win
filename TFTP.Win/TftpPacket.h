@@ -70,7 +70,7 @@ public:
 	/*returns the opcode of most recently received packet*/
 	int GetopCode();
 
-	TftpPacket(){m_blockno=0;}
+	TftpPacket(){m_blockno=0;}							//block number of the packet
 
 protected:
 
@@ -134,10 +134,8 @@ private:
 	int	    m_opCode;								//opcode for the request.
 	char	m_mode[10];								//mode of  the packet(ascii,octet etc).
 	char	m_filename[FILE_NAME_MAX_SIZE];							//name of the file to be written of read
-	int		m_blockno;								//block number of the packet
 	int		m_errorCode;								//Error codes in the error packets.
 	char	m_errorMsg[100];							//Error message in the error responce.
-	char	m_data[TFTP_PACKET_DATA_SIZE];			//Data in the data packet.
 	char	m_packet[TFTP_PACKET_MAX_SIZE];			//contains the final packet.
 };
 #endif

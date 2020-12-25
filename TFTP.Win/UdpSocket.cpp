@@ -111,6 +111,8 @@ UdpSocket::Send(char* buff)
 	char buf[1024];
 	int n;
 	strcpy(buf, buff);
+
+	auto len = strlen(buf);
 	n = sendto(m_Listen, buf, strlen(buf), 0, (struct sockaddr*)&m_server, sizeof(m_server));
 	if (n == 0)
 		return 0;
@@ -130,11 +132,10 @@ UdpSocket::Receive(char* buff)
 	 socklen_t len;
 	 len = sizeof(m_server);
 	 int n=recvfrom(m_Listen,buff,TFTP_PACKET_MAX_SIZE,0,(struct sockaddr *)&m_server,&len);
-	 if (n == -1&&!isServer)
-	 {
-		 printf("error code: %d, error msg: %s\n", 0, "failed to receive responce");
-	 }
-	
+	 //if (n == -1&&!isServer)
+	 //{
+		// printf("error code: %d, error msg: %s\n", 0, "failed to receive responce");
+	 //}
 	 return n;
  
 }

@@ -22,7 +22,8 @@ public:
 	
 	 //returns opcode of the packet 
 	 virtual  int GetopCode()=0;
-
+	 int m_blockno;
+	 char	m_data[1024];			//Data in the data packet.
 	 
 };
 

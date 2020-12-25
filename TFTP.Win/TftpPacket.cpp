@@ -1,5 +1,6 @@
 #include "TftpPacket.h"
 #include "Logger.h"
+#include "Const.h"
 std::stringstream msg;
 
 
@@ -198,8 +199,10 @@ TftpPacket::DecodePacket(char* buf)
 	if (IsACK(buf))
 	{
 		m_opCode = 4;
-		sscanf(&buf[3], "%d", &m_blockno);
-		Logger::Instance().WriteLog(msg << "ACK with block no:" << m_blockno);
+		int temp = 0;
+		sscanf(&buf[3], "%d", &temp);
+		return temp;
+		Logger::Instance().WriteLog(msg << "ACK with block no:" << temp);
 	}
 
 	if (IsData(buf))
@@ -213,10 +216,8 @@ TftpPacket::DecodePacket(char* buf)
 
 	if (IsError(buf))
 	{
-		printf("Error\n");
 		m_opCode = 5;
 		sscanf(&buf[3], "%d %s", &m_errorCode, m_errorMsg);
-		printf("error code: %d, error msg: %s\n", m_errorCode, m_errorMsg);
 	}
 	return m_opCode;
 
