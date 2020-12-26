@@ -7,6 +7,7 @@
 #include "TcpSocket.h"
 #include"UdpSocket.h"
 #include <vector>
+#include "Const.h"
 
 
 
@@ -94,8 +95,11 @@ TftpManager::ReadRequestHandler(Isocket* sock, char* file)
 	while (!infile.eof() && var)
 	{
 		c = infile.get();
-		buf[file_pointer++] = c;
-		i++;
+		if (c != -1)
+		{
+			buf[file_pointer++] = c;
+			i++;
+		}
 		if (infile.eof())
 		{
 			printf("eof\n");
@@ -360,12 +364,21 @@ TftpManager::Read(char* file)
 	m_packet = new TftpPacket;
 	std::stringstream msg;
 	/*Encode and send request*/
-	sprintf(buf, "%s octet", file);
+	if (octet)
+	{
+		sprintf(buf, "%s octet", file);
+		outfile.open(file, std::fstream::out | std::fstream::binary);
+
+	}
+	else
+	{
+		sprintf(buf, "%s netascii", file);
+		outfile.open(file, std::fstream::out);
+	}
 	m_packet->EncodePacket(opcode, buf, packet);
 	m_clientSock->Send(packet);
 	int sliceCount = 0;
 
-	outfile.open(file, std::fstream::out);
 	
 
 	while (true)
@@ -395,17 +408,8 @@ TftpManager::Read(char* file)
 			}
 			outfile.seekg(file_pointer, ios_base::beg);
 			len = strlen(m_packet->m_data);
-			auto s = std::string(m_packet->m_data);
-			auto list = split(s, "\r\n");
-			if (list.size()==1)
-			{
-				list = split(s, "\n");
-			}
-			auto swinstr = Join(list, "\r\n");
-			auto swin = swinstr.c_str();
-			auto winlen = strlen(swin);
-			outfile.write(swin, winlen);
-			file_pointer += winlen;
+			outfile.write(m_packet->m_data, len);
+			file_pointer += len;
 			//size = strlen(&buf[5]);
 
 			m_packet->EncodePacket(opcode, buf, packet);

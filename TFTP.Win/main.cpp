@@ -61,6 +61,15 @@ int parse(int argc, char** argv)
 					strcpy(arguments.req, argv[i]);
 					copystring(arguments.filename, argv[i + 1]);
 				}
+				if (!strcmp(argv[i], "-encode"))
+					if (!strcmp(argv[i+1], "octet"))
+					{
+						octet = true;
+					}
+					else
+					{
+						octet = false;
+					}
 
 			}
 
