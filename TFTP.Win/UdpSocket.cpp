@@ -17,7 +17,7 @@ UdpSocket::Create()
 	 *return 0 for success else 1
 	 */
 	struct timeval timeout;
-	timeout.tv_sec = 10;
+	timeout.tv_sec = 1;
 	timeout.tv_usec = 0;
 	m_Listen = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	setsockopt(m_Listen, SOL_SOCKET, SO_SNDTIMEO, (char*)&timeout,
