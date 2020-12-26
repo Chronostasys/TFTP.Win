@@ -3,6 +3,17 @@
 #include "Const.h"
 std::stringstream msg;
 
+void readToEnd(const char* buf, char* data) {
+	int n = 0;
+	char c;
+	while ((c = buf[n++]) != ' ');
+	int i = n + 1;
+	while ((c = buf[n++]) != '\0')
+	{
+		data[n - i] = c;
+	}
+	data[n - i] = c;
+}
 
 
 int
@@ -208,7 +219,9 @@ TftpPacket::DecodePacket(char* buf)
 	if (IsData(buf))
 	{
 		m_opCode = 3;
-		sscanf(&buf[3], "%d %s", &m_blockno, m_data);
+
+		sscanf(&buf[3], "%d", &m_blockno);
+		readToEnd(&buf[3], m_data);
 		Logger::Instance().WriteLog(msg << "Data Packet with block no:" << m_blockno);
 
 

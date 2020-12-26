@@ -6,6 +6,7 @@
 #include "Isocket.h"
 #include "TcpSocket.h"
 #include"UdpSocket.h"
+#include <vector>
 
 
 
@@ -286,6 +287,61 @@ TftpManager::Run()
 	return 0;
 }
 
+string Join(std::vector<std::string> x,
+	const char* delim) {
+	std::string y;
+
+	switch (x.size())
+	{
+	case 0: y = "";   break;
+	case 1: y = x[0]; break;
+	default:
+		std::ostringstream os;
+		std::copy(x.begin(), x.end() - 1,
+			std::ostream_iterator<std::string>(os, delim));
+		os << *x.rbegin();
+		y = os.str();
+	}
+	return y;
+}
+vector<string> split(const string& s, const string& seperator) {
+	vector<string> result;
+	typedef string::size_type string_size;
+	string_size i = 0;
+
+	while (i != s.size()) {
+		//找到字符串中首个不等于分隔符的字母；
+		int flag = 0;
+		while (i != s.size() && flag == 0) {
+			flag = 1;
+			for (string_size x = 0; x < seperator.size(); ++x)
+				if (s[i] == seperator[x]) {
+					++i;
+					flag = 0;
+					break;
+				}
+		}
+
+		//找到又一个分隔符，将两个分隔符之间的字符串取出；
+		flag = 0;
+		string_size j = i;
+		while (j != s.size() && flag == 0) {
+			for (string_size x = 0; x < seperator.size(); ++x)
+				if (s[j] == seperator[x]) {
+					flag = 1;
+					break;
+				}
+			if (flag == 0)
+				++j;
+		}
+		if (i != j) {
+			result.push_back(s.substr(i, j - i));
+			i = j;
+		}
+	}
+	return result;
+}
+
 
 
 int
@@ -337,10 +393,19 @@ TftpManager::Read(char* file)
 				m_packet->EncodePacket(opcode, "", packet);
 				goto receive;
 			}
-			outfile.seekg((m_packet->m_blockno-1)*511, ios_base::beg);
+			outfile.seekg(file_pointer, ios_base::beg);
 			len = strlen(m_packet->m_data);
-			outfile.write(m_packet->m_data, len);
-			file_pointer += len;
+			auto s = std::string(m_packet->m_data);
+			auto list = split(s, "\r\n");
+			if (list.size()==1)
+			{
+				list = split(s, "\n");
+			}
+			auto swinstr = Join(list, "\r\n");
+			auto swin = swinstr.c_str();
+			auto winlen = strlen(swin);
+			outfile.write(swin, winlen);
+			file_pointer += winlen;
 			//size = strlen(&buf[5]);
 
 			m_packet->EncodePacket(opcode, buf, packet);
