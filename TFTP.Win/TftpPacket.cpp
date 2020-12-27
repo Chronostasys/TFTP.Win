@@ -212,8 +212,8 @@ TftpPacket::DecodePacket(char* buf)
 		m_opCode = 4;
 		int temp = 0;
 		sscanf(&buf[3], "%d", &temp);
-		return temp;
 		Logger::Instance().WriteLog(msg << "ACK with block no:" << temp);
+		return temp;
 	}
 
 	if (IsData(buf))

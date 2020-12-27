@@ -155,56 +155,106 @@ TftpManager::ReadRequestHandler(Isocket* sock, char* file)
 int
 TftpManager::WriteRequestHandler(Isocket* sock, char* file)
 {
-	char buf[TFTP_PACKET_MAX_SIZE];
+writeStart:
+	printf("start write\n");
 	char packet[TFTP_PACKET_MAX_SIZE];
-	fstream outfile;
+	char buf[TFTP_PACKET_MAX_SIZE];
 	int opcode;
-	int size;
+	fstream outfile;
 	int file_pointer;
-	opcode = 4;
+	int size;
 	file_pointer = 0;
-	Ipacket* Wpacket;
-	Wpacket = new TftpPacket;
+	opcode = PACKET_ACK;
+	Ipacket* m_packet;
+	m_packet = new TftpPacket;
 	std::stringstream msg;
-	outfile.open(file, std::fstream::in | std::fstream::out | std::fstream::app);
+	/*Encode and send request*/
+	if (octet)
+	{
+		outfile.open(file, std::fstream::out | std::fstream::binary);
 
-	/*Send ACK */
-	Wpacket->EncodePacket(opcode, buf, packet);
-	Error_Barrier(sock->Send(packet));
+	}
+	else
+	{
+		outfile.open(file, std::fstream::out);
+	}
+	//m_packet->EncodePacket(opcode, buf, packet);
+	//sock->Send(packet);
+		/*Send ACK */
+	m_packet->EncodePacket(opcode, buf, packet);
+	while (sock->Send(packet) == -1);
+	opcode = PACKET_READ;
+	int sliceCount = 0;
+
+
 
 	while (true)
 	{
-		/*Receive data and write into file*/
-		ZeroMemory(&buf, sizeof(buf));
-		sock->Receive(buf);
-		Wpacket->DecodePacket(buf);
-
-		if (Wpacket->GetopCode() == PACKET_DATA)
+	receive:
+		/*Receive  packet */
+		ZeroMemory(&buf, TFTP_PACKET_MAX_SIZE);
+		size = sock->Receive(buf);
+		while (size == -1)
 		{
+			sock->Send(packet);
+			size = sock->Receive(buf);
+		}
 
+		m_packet->DecodePacket(buf);
+		opcode = PACKET_ACK;
+		auto op = m_packet->GetopCode();
+		auto len = 0;
+		/*if data packet write into file*/
+		if (op == PACKET_DATA)
+		{
+			if (++sliceCount != m_packet->m_blockno)
+			{
+				sliceCount--;
+				m_packet->EncodePacket(opcode, "", packet);
+				goto receive;
+			}
 			outfile.seekg(file_pointer, ios_base::beg);
-			outfile.write(&buf[5], strlen(&buf[5]));
-			file_pointer += strlen(&buf[5]);
-			size = strlen(&buf[5]);
+			len = strlen(m_packet->m_data);
+			outfile.write(m_packet->m_data, len);
+			file_pointer += len;
+			//size = strlen(&buf[5]);
 
-			/*Send ACK*/
-			Wpacket->EncodePacket(opcode, buf, packet);
-			Error_Barrier(sock->Send(packet));
+			m_packet->EncodePacket(opcode, buf, packet);
+			sock->Send(packet);
+
 		}
 		else
 		{
-			/*if not a data packet send error_packet*/
-			sprintf(buf, "%d wrongpacket ", ERROR_WRONG_PACKET);
-			Wpacket->EncodePacket(5, buf, packet);
-			Error_Barrier(sock->Send(packet));
+			int errCode = 0;
+			sscanf(&buf[3], "%d", &errCode);
+			if (errCode == 2)
+			{
+				printf("rewrite\n");
+				goto writeStart;
+			}
+			else
+			{
+				/*If not a data packet send error packet*/
+				printf("Error! %s\n", buf);
+				sprintf(buf, "%d wrongpacket ", ERROR_WRONG_PACKET);
+				m_packet->EncodePacket(5, buf, packet);
+				sock->Send(packet);
+				outfile.close();
+				remove(file);
+				break;
+			}
+		}
+		/*if last data packet then close*/
+		if (len < 511)
+		{
+			printf("write end\n");
 			break;
 		}
-		if (size < 511)
-			break;
+			
 	}
 	outfile.close();
-	free(Wpacket);
-	return 1;
+	free(m_packet);
+	return 0;
 }
 
 
@@ -241,8 +291,15 @@ TftpManager::RequestHandler(void* socket)
 		/*If write request call wrirerequesthandler*/
 		if (m_packet->GetopCode() == PACKET_WRITE)
 		{
-			sscanf(&buf[2], "%s", file);
-			Error_Barrier(WriteRequestHandler(sock, file));
+			char mode[10];
+			printf("wrq handle\n");
+			sscanf(&buf[2], "%s %s", file, mode);
+			printf("%s\n", mode);
+			if (!strcmp(mode, "octet"))
+			{
+				octet = true;
+			}
+			WriteRequestHandler(sock, file);
 
 		}
 
@@ -449,65 +506,103 @@ TftpManager::Read(char* file)
 
 int TftpManager::Write(char* file)
 {
-	int opcode;
-	int block;
+//start:
+	char buf[TFTP_PACKET_MAX_SIZE];
 	char packet[TFTP_PACKET_MAX_SIZE];
-	char buffer[TFTP_PACKET_MAX_SIZE];
-	char c;
+	int opcode;
+	int blockno;
 	int file_pointer;
-	fstream infile;
-	std::stringstream msg;
+	char c;
+	ifstream infile;
 	opcode = PACKET_WRITE;
-	block = 1;
+	blockno = 1;
 	file_pointer = 0;
-	Ipacket* m_packet;
-	m_packet = new TftpPacket;
+	std::stringstream msg;
+	Ipacket* Rpacket;
+	Rpacket = new TftpPacket;
+
 
 	/*Encode request and send*/
-	sprintf(buffer, "%s octet", file);
-	m_packet->EncodePacket(opcode, buffer, packet);
+	sprintf(buf, "%s %s", file, octet?"octet":"netascii");
+	Rpacket->EncodePacket(opcode, buf, packet);
 	m_clientSock->Send(packet);
 
 	/*Receive ACK*/
 
-	m_clientSock->Receive(buffer);
-	m_packet->DecodePacket(buffer);
+	int a = m_clientSock->Receive(buf);
+	while (a==-1)
+	{
+		m_clientSock->Send(packet);
 
-	infile.open(file, std::fstream::in);
+		/*Receive ACK*/
+
+		a = m_clientSock->Receive(buf);
+	}
+	Rpacket->DecodePacket(buf);
+
+
+
+	infile.open(file, ios::binary);
+
+	infile.seekg(0, ios::beg);
+	int i = 0;
 	opcode = PACKET_DATA;
 	while (!infile.eof())
 	{
 		c = infile.get();
-		buffer[file_pointer++] = c;
-
+		if (c != -1)
+		{
+			buf[file_pointer++] = c;
+			i++;
+		}
+		if (infile.eof())
+		{
+			printf("eof\n");
+		}
 		if (file_pointer >= 511 || infile.eof())
 		{
-			/*Send 512 bytes of data except incase of EOF send less then 512*/
-			buffer[file_pointer] = '\0';
-
-			m_packet->EncodePacket(opcode, buffer, packet);
-			m_clientSock->Send(packet);
+			/*Send 512 bytes of data except incase of EOF send less then 512bytes*/
+			buf[file_pointer] = '\0';
+			Rpacket->EncodePacket(opcode, buf, packet);
+			Error_Barrier(m_clientSock->Send(packet));
 
 			/*Receive  packet(ack expected)*/
 
-			m_clientSock->Receive(buffer);
-			m_packet->DecodePacket(buffer);
-
-			if (m_packet->GetopCode() != PACKET_ACK)
+			auto re = m_clientSock->Receive(buf);
+			auto ackNum = -1;
+			if (re != -1)
 			{
-				/*if not ACK send error packet*/
-				sprintf(buffer, "%d wrongpacket ", ERROR_WRONG_PACKET);
-				m_packet->EncodePacket(5, buffer, packet);
-				m_clientSock->Send(packet);
+				ackNum = Rpacket->DecodePacket(buf);
+			}
+			while (re == -1 || ackNum != Rpacket->m_blockno)
+			{
+				Error_Barrier(m_clientSock->Send(packet));
+				re = m_clientSock->Receive(buf);
+				if (re != -1)
+				{
+					ackNum = Rpacket->DecodePacket(buf);
+				}
+			}
+
+			//if (Rpacket->GetopCode() == PACKET_READ)
+			//{
+			//	goto start;
+			//}
+
+			/*If not ack send error packet and close the connection*/
+			if (Rpacket->GetopCode() != PACKET_ACK)
+			{
+				printf("%s", buf);
+				//sprintf(buf, "%d wrongpacket %s", ERROR_WRONG_PACKET);
+				Rpacket->EncodePacket(5, buf, packet);
+				Error_Barrier(m_clientSock->Send(packet));
 				break;
 			}
-			file_pointer = 0;		//else repeat the process
+			file_pointer = 0;
 		}
 	}
-
 	infile.close();
-	Error_Barrier(m_clientSock->Close());
-	free(m_packet);
+	free(Rpacket);
 	return 1;
 }
 
