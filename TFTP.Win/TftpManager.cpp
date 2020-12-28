@@ -194,15 +194,18 @@ writeStart:
 		/*Receive  packet */
 		ZeroMemory(&buf, TFTP_PACKET_MAX_SIZE);
 		size = sock->Receive(buf);
-		while (size == -1)
-		{
-			sock->Send(packet);
-			size = sock->Receive(buf);
-		}
-
 		m_packet->DecodePacket(buf);
 		opcode = PACKET_ACK;
 		auto op = m_packet->GetopCode();
+		while (size == -1||op== PACKET_WRITE)
+		{
+			sock->Send(packet);
+			size = sock->Receive(buf);
+			m_packet->DecodePacket(buf);
+			opcode = PACKET_ACK;
+			op = m_packet->GetopCode();
+		}
+
 		auto len = 0;
 		/*if data packet write into file*/
 		if (op == PACKET_DATA)

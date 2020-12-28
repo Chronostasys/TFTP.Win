@@ -26,22 +26,10 @@ namespace TFTP.WinFormApp
         {
 
         }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            var re = folderBrowserDialog1.ShowDialog();
-            textBox1.Text = folderBrowserDialog1.SelectedPath;
-            if (!string.IsNullOrEmpty(textBox1.Text))
-            {
-                numericUpDown1.Enabled = true;
-                button2.Enabled = true;
-            }
-        }
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             try
             {
-                cmd.Kill(true);
                 cmdc.Kill(true);
             }
             catch (Exception)
@@ -53,7 +41,6 @@ namespace TFTP.WinFormApp
         {
             try
             {
-                cmd.Kill(true);
                 cmdc.Kill(true);
             }
             catch (Exception)
@@ -61,19 +48,7 @@ namespace TFTP.WinFormApp
             }
             base.OnClosed(e);
         }
-        Process cmd = new Process();
         Process cmdc = new Process();
-        private void button2_Click(object sender, EventArgs e)
-        {
-            cmd.StartInfo.FileName = "cmd.exe";
-            cmd.StartInfo.CreateNoWindow = true;
-            cmd.StartInfo.UseShellExecute = false;
-            cmd.StartInfo.Arguments = $"/C cd \"{textBox1.Text}\" & dir & {Path.Combine(prevDir, "TFTP.Win.exe")} tftp -s port \"({(int)numericUpDown1.Value})\"";
-            cmd.Start();
-            flowLayoutPanel1.Visible = false;
-            MessageBox.Show($"Start server at port {(int)numericUpDown1.Value}");
-            flowLayoutPanel2.Visible = true;
-        }
         volatile bool processing = false;
 
         private void button3_Click(object sender, EventArgs e)
@@ -83,7 +58,7 @@ namespace TFTP.WinFormApp
                 MessageBox.Show("Still processing last request! Please wait", "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            if (!checkBox1.Checked&&!File.Exists(Path.Combine(prevDir, textBox2.Text)))
+            if (!checkBox1.Checked&&!File.Exists(Path.Combine(textBox3.Text, textBox2.Text)))
             {
                 MessageBox.Show("File not exist!", "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
@@ -97,7 +72,8 @@ namespace TFTP.WinFormApp
             var op = checkBox1.Checked ? "read" : "write";
             cmdc.StartInfo.Arguments = "";
             cmdc.Start();
-            cmdc.StandardInput.WriteLine($"cd \"{textBox3.Text}\" & {Path.Combine(prevDir, "TFTP.Win.exe")} tftp -c host \"(127.0.0.1)\" port \"({(int)numericUpDown2.Value})\" -proto \"(udp)\" -{op} \"(./{textBox2.Text})\" & exit");
+            var encode = checkBox2.Checked ? "octet" : "netascii";
+            cmdc.StandardInput.WriteLine($"cd \"{textBox3.Text}\" & {Path.Combine(prevDir, "TFTP.Win.exe")} tftp -c host \"({textBox1.Text})\" port \"({(int)numericUpDown2.Value})\" -proto \"(udp)\" -{op} \"(./{textBox2.Text})\" -encode {encode} & exit");
             cmdc.StandardInput.Flush();
 
             Task.Run(() =>
@@ -106,7 +82,7 @@ namespace TFTP.WinFormApp
                 var outs = cmdc.StandardOutput.ReadToEnd().Split('\n');
                 if (outs[outs.Length - 3].ToUpper().Contains("ERROR"))
                 {
-                    MessageBox.Show(outs[outs.Length - 3],"ERROR",MessageBoxButtons.OK,MessageBoxIcon.Error);
+                    MessageBox.Show(outs[outs.Length - 3],"ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 else
                     MessageBox.Show(outs[outs.Length-2],"SPEED");
